@@ -44,7 +44,7 @@ export default function NewTransactionPage() {
 
     const filePath = `expenses/${userId}/${Date.now()}-${file.name}`;
 
-    const { data, error } = await supabase.storage
+    const { error } = await supabase.storage
       .from("expenses")
       .upload(filePath, file);
 

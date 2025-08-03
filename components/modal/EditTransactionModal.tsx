@@ -1,19 +1,20 @@
 "use client";
 
 import { Dialog, DialogPanel, DialogTitle } from "@headlessui/react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 // import TransactionForm from "@/components/forms/TransactionForm";
 import { supabase } from "@/lib/supabase";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import { useRouter } from "next/navigation";
 import TransactionForm from "../form/TransactionForm";
 import { ExpenseForm } from "@/lib/types";
 import { useForm } from "react-hook-form";
+import { useToast } from "../ToastContext";
 
 type Props = {
   open: boolean;
   onClose: () => void;
-  transaction: ExpenseForm & { id: string };
+  transaction: ExpenseForm;
 };
 
 export default function EditTransactionModal({
@@ -22,14 +23,17 @@ export default function EditTransactionModal({
   transaction,
 }: Props) {
   const router = useRouter();
+  const toast = useToast();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [formReset, setFormReset] = useState<
+  const formResetRef = useRef<
     ReturnType<typeof useForm<ExpenseForm>>["reset"] | null
   >(null);
+  const previousOpenRef = useRef(open);
+  const userId = "demo-user-id"; // replace with actual user session
 
   const handleUpload = async (file: File | null): Promise<string | null> => {
     if (!file) return null;
-    const path = `expenses/${transaction.id}/${Date.now()}-${file.name}`;
+    const path = `${userId}/${Date.now()}`;
     const { error } = await supabase.storage
       .from("expenses")
       .upload(path, file);
@@ -52,22 +56,34 @@ export default function EditTransactionModal({
     });
 
     if (res.ok) {
-      toast.success("Berhasil diperbarui!");
+      // toast.success("Berhasil diperbarui!");
+      toast.expenseUpdated();
       router.refresh();
       onClose();
     } else {
-      toast.error("Gagal update data");
+      toast.expenseError("mengubah");
     }
     setIsSubmitting(false);
   };
 
+  // Use useCallback to create a stable reference for the onFormReady function
+  const handleFormReady = useCallback(
+    (reset: ReturnType<typeof useForm<ExpenseForm>>["reset"]) => {
+      formResetRef.current = reset;
+    },
+    []
+  );
+
   // Effect to reset the form when the modal closes
   useEffect(() => {
-    if (!open && formReset) {
-      // Check if the modal is closing and the reset function is available
-      formReset();
+    const wasOpen = previousOpenRef.current;
+    previousOpenRef.current = open;
+
+    // Only reset when modal transitions from open to closed
+    if (wasOpen && !open && formResetRef.current) {
+      formResetRef.current();
     }
-  }, [open, formReset]); // Depend on 'open' and 'formReset'
+  }, [open]);
 
   return (
     <Dialog
@@ -86,7 +102,7 @@ export default function EditTransactionModal({
           onSubmit={handleSubmit}
           isEdit
           isSubmitting={isSubmitting}
-          onFormReady={setFormReset} // Pass setFormReset to the child
+          onFormReady={handleFormReady}
         />
       </DialogPanel>
     </Dialog>

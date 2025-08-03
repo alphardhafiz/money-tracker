@@ -1,4 +1,4 @@
-import { prisma } from "@/lib/prisma";
+import prisma from "@/lib/prisma";
 import { NextRequest, NextResponse } from "next/server";
 
 export async function POST(req: NextRequest) {
@@ -28,6 +28,30 @@ export async function POST(req: NextRequest) {
     return NextResponse.json({ data: expense }, { status: 201 });
   } catch (error) {
     console.error("[create expense]", error);
+    return NextResponse.json(
+      { error: "Internal Server Error" },
+      { status: 500 }
+    );
+  }
+}
+
+export async function GET(req: NextRequest) {
+  try {
+    const { searchParams } = new URL(req.url);
+    const userId = searchParams.get("userId");
+
+    if (!userId) {
+      return NextResponse.json({ error: "Missing userId" });
+    }
+
+    const expenses = await prisma.expense.findMany({
+      where: { userId },
+      orderBy: { date: "desc" },
+    });
+
+    return NextResponse.json({ data: expenses });
+  } catch (error) {
+    console.error("[get expenses]", error);
     return NextResponse.json(
       { error: "Internal Server Error" },
       { status: 500 }
