@@ -9,6 +9,7 @@ import TransactionForm from "../form/TransactionForm";
 import { ExpenseForm } from "@/lib/types";
 import { useForm } from "react-hook-form";
 import { useToast } from "../ToastContext";
+import { X } from "lucide-react";
 // import { useToast } from "./ToastContext";
 
 type Props = {
@@ -86,13 +87,22 @@ export default function AddTransactionModal({ open, onClose }: Props) {
     <Dialog
       open={open}
       onClose={onClose}
-      className="fixed inset-0 z-50 flex items-center justify-center max-h-[80%]"
+      className="fixed inset-0 z-50 flex items-center justify-center"
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <DialogPanel className="z-50 max-w-md w-full mx-auto bg-white p-6 rounded-2xl shadow-xl">
-        <DialogTitle className="text-lg font-semibold text-violet-700 mb-4">
-          Tambah Pengeluaran
-        </DialogTitle>
+        <div className="flex items-center justify-between mb-4">
+          <DialogTitle className="text-lg font-semibold text-violet-700">
+            Tambah Pengeluaran
+          </DialogTitle>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Tutup modal"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
         <TransactionForm
           onSubmit={handleSubmit}
           isSubmitting={isSubmitting}

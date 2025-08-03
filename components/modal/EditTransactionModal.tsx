@@ -10,6 +10,7 @@ import TransactionForm from "../form/TransactionForm";
 import { ExpenseForm } from "@/lib/types";
 import { useForm } from "react-hook-form";
 import { useToast } from "../ToastContext";
+import { X } from "lucide-react";
 
 type Props = {
   open: boolean;
@@ -93,9 +94,18 @@ export default function EditTransactionModal({
     >
       <div className="fixed inset-0 bg-black/30" aria-hidden="true" />
       <DialogPanel className="z-50 max-w-md w-full mx-auto bg-white p-6 rounded-2xl shadow-xl">
-        <DialogTitle className="text-lg font-semibold text-violet-700 mb-4">
-          Edit Pengeluaran
-        </DialogTitle>
+        <div className="flex items-center justify-between mb-4">
+          <DialogTitle className="text-lg font-semibold text-violet-700">
+            Edit Pengeluaran
+          </DialogTitle>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-full hover:bg-gray-100 transition-colors"
+            aria-label="Tutup modal"
+          >
+            <X className="w-5 h-5 text-gray-500" />
+          </button>
+        </div>
         <TransactionForm
           defaultValues={transaction}
           defaultFileUrl={transaction.fileUrl} // ⬅ TAMBAHKAN INI
